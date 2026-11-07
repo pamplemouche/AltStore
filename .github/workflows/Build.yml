@@ -20,16 +20,13 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: Ensure submodules are fully updated
+      - name: Force update submodules recursively
         run: |
-          git submodule update --init --recursive
+          git submodule sync --recursive
+          git submodule update --init --recursive --force
 
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode.app
-
-      - name: Resolve Swift Package Dependencies
-        run: |
-          xcodebuild -resolvePackageDependencies -project AltStore.xcodeproj -scheme AltStore
 
       - name: Build Archive
         run: |
@@ -37,9 +34,13 @@ jobs:
             -project AltStore.xcodeproj \
             -scheme AltStore \
             -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
             -archivePath build/AltStore.xcarchive \
+            -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_PROVISIONING_PROFILE=""
 
       - name: Export Payload to IPA
         run: |
