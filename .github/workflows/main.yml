@@ -1,0 +1,45 @@
+name: Build AltStore IPA
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode Version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+
+      - name: Cache CocoaPods / Dependencies
+        uses: actions/cache@v4
+        with:
+          path: Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+
+      - name: Build Archive
+        run: |
+          xcodebuild archive \
+            -project AltStore.xcodeproj \
+            -scheme AltStore \
+            -sdk iphoneos \
+            -archivePath build/AltStore.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
+
+      - name: Export Payload to IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R build/AltStore.xcarchive/Products/Applications/AltStore.app build/Payload/
+          cd build && zip -r AltStore-patched.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AltStore-patched-ipa
+          path: build/AltStore-patched.ipa
