@@ -3,8 +3,8 @@ name: Build AltStore Classic
 on:
   push:
     branches:
-      - '**' # S'exécute sur TOUTES les branches (y compris Classic)
-  workflow_dispatch: # Permet de lancer la compilation à la main depuis l'onglet Actions
+      - '**'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -17,10 +17,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          submodules: recursive # Important pour récupérer les sous-modules de code (AltSign, etc.)
+          submodules: recursive
 
       - name: Select Xcode Version
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+        run: sudo xcode-select -s /Applications/Xcode.app
 
       - name: Build Archive
         run: |
