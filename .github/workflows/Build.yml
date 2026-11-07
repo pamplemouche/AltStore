@@ -1,9 +1,13 @@
-name: Build AltStore IPA
+name: Build AltStore Classic
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - '**' # S'exécute sur TOUTES les branches (y compris Classic)
+  workflow_dispatch: # Permet de lancer la compilation à la main depuis l'onglet Actions
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -12,15 +16,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive # Important pour récupérer les sous-modules de code (AltSign, etc.)
 
       - name: Select Xcode Version
         run: sudo xcode-select -s /Applications/Xcode_15.4.app
-
-      - name: Cache CocoaPods / Dependencies
-        uses: actions/cache@v4
-        with:
-          path: Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
 
       - name: Build Archive
         run: |
